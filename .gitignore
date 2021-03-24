@@ -1,4 +1,10 @@
+# My ignored files
 venv/
+__pycache__/
+*.txt
+*.csv
+*.xlsx
+*.html
 
 # Default ignored files
 /shelf/
