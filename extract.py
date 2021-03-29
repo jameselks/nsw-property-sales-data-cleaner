@@ -32,11 +32,11 @@ def extract (filename):
 for file in os.listdir(datadir):
     filename = os.fsdecode(file)
     if filename.endswith(".zip"):
-        print("Extracting " + datadir + "/" + filename)
+        print("Processing " + datadir + "/" + filename + " - " + str(int(time.time() - start)) + " seconds")
         outputdata = outputdata + extract(datadir + "/" + filename)
 
 print("Writing extract file")
-f = open("extract.txt", "w+")
+f = open("extract-1-raw.txt", "w+")
 f.write(outputdata)
 f.close()
 print("Now compacting the data - " + str(int(time.time() - start)) + " seconds")
@@ -51,29 +51,32 @@ for line in outputdata.splitlines():
 outputfile = ''.join(outputarray)
 
 
-f = open("extract-compact.txt", "w+")
+f = open("extract-2-clean.txt", "w+")
 f.write(outputfile)
 f.close()
 
 import pandas as pd
-import pandas_profiling
-from pandas_profiling import ProfileReport
+
+start = time.time()
+print("And processing the data - " + str(int(time.time() - start)) + " seconds")
 
 #---
 # Import the data from the text file
-print("Reading the data")
 
+date_converter = lambda x: pd.to_datetime(x, format="%Y%m%d", errors='coerce')
 columns_with_dates = ["Contract date", "Settlement date"]
 column_names = ["Record type", "District code", "Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Nature of property", "Primary purpose", "Strata lot number", "Component code", "Sale code", "% interest of sale", "Dealing number", "Empty"]
 include_columns = ["Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Primary purpose", "Strata lot number"]
-df = pd.read_csv("extract-compact.txt", delimiter=";", header=None, names=column_names, encoding='utf8', usecols=include_columns, parse_dates=columns_with_dates)
+
+df = pd.read_csv("extract-2-clean.txt", delimiter=";", header=None, names=column_names, encoding='utf8', usecols=include_columns, parse_dates=columns_with_dates, date_parser=date_converter)
 
 #---
 # Processing the data
-print("Processing the data")
 
 # Convert hectares to square metres
 df.loc[df['Area type'] == "H", 'Area'] = df['Area'] * 10000
+df['Area'] = pd.to_numeric(df['Area'], errors='coerce')
+df['Property post code'] = pd.to_numeric(df['Property post code'], errors='coerce', downcast='float')
 df['Primary purpose'] = df['Primary purpose'].str.capitalize()
 df['Property name'] = df['Property name'].str.title()
 df['Property street name'] = df['Property street name'].str.title()
@@ -81,19 +84,9 @@ df['Property locality'] = df['Property locality'].str.title()
 
 #---
 # Exporting to a CSV for further analysis
-print("Finally - exporting to CSV")
+print("Finally exporting to CSV - " + str(int(time.time() - start)) + " seconds")
 
-export_columns = ["Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Contract date", "Settlement date", "Purchase price", "Zoning", "Primary purpose", "Strata lot number"]
-df.to_csv("extract.csv", columns=export_columns)
+export_columns = ["Property ID", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Contract date", "Settlement date", "Purchase price", "Zoning", "Primary purpose", "Strata lot number"]
+df.to_csv("extract-3-very-clean.csv", columns=export_columns)
 
-#---
-# Creating profie report of subset
-
-profile = ProfileReport(df, title="Pandas Profiling Report")
-profile.to_file("your_report.html")
-
-print("And we're done!")
-
-
-
-
+print("And we're done! Total time was "  + str(int(time.time() - start)) + " seconds")
