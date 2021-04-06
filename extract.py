@@ -1,5 +1,3 @@
-import process
-
 print('Hello! Python is up and running.')
 import time
 start = time.time()
