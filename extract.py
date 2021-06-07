@@ -16,12 +16,10 @@ def extract (filename):
     for file in zip.namelist():
         if (os.path.splitext(file)[1]).lower() == ".dat":
             output_rawarr.append(zip.read(file).decode("utf-8") + "\n")
-            #outputdata = outputdata + zip.read(file).decode("utf-8")
         elif (os.path.splitext(file)[1]).lower() == ".zip":
             zipInner = zipfile.ZipFile(io.BytesIO(zip.read(file)))
             for file2 in zipInner.namelist():
                 if (os.path.splitext(file2)[1]).lower() == ".dat":
-                    #outputdata = outputdata + (zipInner.read(file2)).decode("utf-8")
                     output_rawarr.append((zipInner.read(file2)).decode("utf-8") + "\n")
                 else:
                     print("Ignored file - " + file2)
@@ -35,7 +33,6 @@ for file in os.listdir(datadir):
     if filename.endswith(".zip"):
         print("Processing " + datadir + "/" + filename + " - " + str(int(time.time() - start)) + " seconds")
         extract(datadir + "/" + filename)
-        #outputdata = outputdata + extract(datadir + "/" + filename)
 
 output_rawfile = ''.join(output_rawarr)
 f = open("extract-1-raw.txt", "w+")
