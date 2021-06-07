@@ -1,6 +1,3 @@
-# TODO:
-#   - Add C records - they contain Lot/DP details
-
 print('Hello! Python is up and running.')
 import time
 start = time.time()
@@ -48,10 +45,14 @@ print("Now compacting the data - " + str(int(time.time() - start)) + " seconds")
 
 outputarray = []
 outputfile = ""
+found = False
 print(len(output_rawfile.splitlines()))
 for line in output_rawfile.splitlines():
     if line[0:1] == "B":
-        outputarray.append(line + "\n")
+        outputarray.append("\n" + line)
+    elif line[0:1] == "C":
+        outputarray.append(line.split(";")[-2])
+
 
 outputfile = ''.join(outputarray)
 
@@ -68,8 +69,8 @@ print("And processing the data - " + str(int(time.time() - start)) + " seconds")
 
 date_converter = lambda x: pd.to_datetime(x, format="%Y%m%d", errors='coerce')
 columns_with_dates = ["Contract date", "Settlement date"]
-column_names = ["Record type", "District code", "Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Nature of property", "Primary purpose", "Strata lot number", "Component code", "Sale code", "% interest of sale", "Dealing number", "Empty"]
-include_columns = ["Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Primary purpose", "Strata lot number"]
+column_names = ["Record type", "District code", "Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Nature of property", "Primary purpose", "Strata lot number", "Component code", "Sale code", "% interest of sale", "Dealing number", "Property legal description"]
+include_columns = ["Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Primary purpose", "Strata lot number", "Property legal description"]
 
 df = pd.read_csv("extract-2-clean.txt", delimiter=";", header=None, names=column_names, encoding='utf8', usecols=include_columns, parse_dates=columns_with_dates, date_parser=date_converter)
 
