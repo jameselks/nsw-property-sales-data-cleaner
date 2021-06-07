@@ -1,4 +1,5 @@
-import process
+# TODO:
+#   - Add C records - they contain Lot/DP details
 
 print('Hello! Python is up and running.')
 import time
@@ -9,47 +10,50 @@ import io
 import zipfile
 
 datadir = "./data"
-outputdata = ""
+
+output_rawarr = []
+output_rawfile = ""
 
 def extract (filename):
-    outputdata = ""
     zip = zipfile.ZipFile(filename)
     for file in zip.namelist():
         if (os.path.splitext(file)[1]).lower() == ".dat":
-            outputdata = outputdata + zip.read(file).decode("utf-8")
+            output_rawarr.append(zip.read(file).decode("utf-8") + "\n")
+            #outputdata = outputdata + zip.read(file).decode("utf-8")
         elif (os.path.splitext(file)[1]).lower() == ".zip":
             zipInner = zipfile.ZipFile(io.BytesIO(zip.read(file)))
             for file2 in zipInner.namelist():
                 if (os.path.splitext(file2)[1]).lower() == ".dat":
-                    outputdata = outputdata + (zipInner.read(file2)).decode("utf-8")
+                    #outputdata = outputdata + (zipInner.read(file2)).decode("utf-8")
+                    output_rawarr.append((zipInner.read(file2)).decode("utf-8") + "\n")
                 else:
                     print("Ignored file - " + file2)
         else:
             print("Ignored file - " + file)
 
-    return outputdata
+    return
 
 for file in os.listdir(datadir):
     filename = os.fsdecode(file)
     if filename.endswith(".zip"):
         print("Processing " + datadir + "/" + filename + " - " + str(int(time.time() - start)) + " seconds")
-        outputdata = outputdata + extract(datadir + "/" + filename)
+        extract(datadir + "/" + filename)
+        #outputdata = outputdata + extract(datadir + "/" + filename)
 
-print("Writing extract file")
+output_rawfile = ''.join(output_rawarr)
 f = open("extract-1-raw.txt", "w+")
-f.write(outputdata)
+f.write(output_rawfile)
 f.close()
 print("Now compacting the data - " + str(int(time.time() - start)) + " seconds")
 
 outputarray = []
 outputfile = ""
-print(len(outputdata.splitlines()))
-for line in outputdata.splitlines():
+print(len(output_rawfile.splitlines()))
+for line in output_rawfile.splitlines():
     if line[0:1] == "B":
         outputarray.append(line + "\n")
 
 outputfile = ''.join(outputarray)
-
 
 f = open("extract-2-clean.txt", "w+")
 f.write(outputfile)
@@ -57,7 +61,6 @@ f.close()
 
 import pandas as pd
 
-start = time.time()
 print("And processing the data - " + str(int(time.time() - start)) + " seconds")
 
 #---
