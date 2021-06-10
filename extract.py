@@ -7,6 +7,7 @@ start = time.time()
 import os
 import io
 import zipfile
+import csv
 
 datadir = "./data"
 
@@ -71,7 +72,7 @@ columns_with_dates = ["Contract date", "Settlement date"]
 column_names = ["Record type", "District code", "Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Nature of property", "Primary purpose", "Strata lot number", "Component code", "Sale code", "% interest of sale", "Dealing number", "Property legal description"]
 include_columns = ["Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Primary purpose", "Strata lot number", "Property legal description"]
 
-df = pd.read_csv("extract-2-clean.txt", delimiter=";", header=None, names=column_names, encoding='utf8', usecols=include_columns, parse_dates=columns_with_dates, date_parser=date_converter)
+df = pd.read_csv("extract-2-clean.txt", delimiter=";", header=None, names=column_names, encoding='utf8', usecols=include_columns, parse_dates=columns_with_dates, date_parser=date_converter, quoting=csv.QUOTE_NONE)
 
 #---
 # Processing the data
