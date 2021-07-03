@@ -4,7 +4,9 @@ The data from the bulk NSW Valuer General's Property Sales Information (PSI) mak
 
 Basically:
 
-* Python to extract the data from the .zip files and delete all the junk
+* Python to download the latest copy of the (.zip) data files as they are regularly updated
+
+* Python to extract the data from the data (.zip) files and delete all the junk
 
 * Jupyter to do whatever analysis you want.
 
