@@ -1,9 +1,10 @@
 venv/
 __pycache__/
 .idea/
-*.txt
-*.csv
+extract-*.txt
+*extract-*.csv
 *.xlsx
 *.html
 .vscode/settings.json
 data/
+property-sales-data-*
