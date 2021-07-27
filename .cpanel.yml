@@ -1,0 +1,5 @@
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/jameselk/sites/nswpropertysalesdata.com-ops/pythonapp
+    - /bin/cp download.py $DEPLOYPATH
+    - /bin/cp extract.py $DEPLOYPATH
