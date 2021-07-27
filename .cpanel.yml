@@ -1,3 +1,4 @@
+---
 deployment:
   tasks:
     - export DEPLOYPATH=/home/jameselk/sites/nswpropertysalesdata.com-ops/pythonapp
