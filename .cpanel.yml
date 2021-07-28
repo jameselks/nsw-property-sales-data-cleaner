@@ -3,3 +3,4 @@ deployment:
       tasks:
         - export DEPLOYPATH=/home/jameselk/sites/nswpropertysalesdata.com-ops/pythonapp
         - /bin/cp /home/jameselk/sites/nswpropertysalesdata.com-ops/nsw-property-sales-data-cleaner/download.py $DEPLOYPATH
+        - /bin/cp /home/jameselk/sites/nswpropertysalesdata.com-ops/nsw-property-sales-data-cleaner/extract.py $DEPLOYPATH
