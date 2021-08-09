@@ -34,3 +34,4 @@ for year in range(int(this_year-years_to_collect), int(this_year)):
     print('Downloading... ' + download_url)
     urllib.request.urlretrieve(download_url, download_dir + str(year) + '.zip')
 
+print('Downloading complete')
