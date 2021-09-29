@@ -1,6 +1,7 @@
 # 
 
 print('Hello! Python is up and running.')
+print('Creating zip archive')
 import time
 start = time.time()
 
@@ -17,4 +18,4 @@ zipfile.ZipFile(name_new + '.zip', mode='w').write(name_new + ".csv", compress_t
 
 os.rename(name_new + '.csv', name_original)
 
-print('Finished')
+print("Archive has been created! Elapsed time was "  + str(int(time.time() - start)) + " seconds")
