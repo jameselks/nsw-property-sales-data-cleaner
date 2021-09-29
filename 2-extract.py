@@ -93,4 +93,4 @@ print("Finally exporting to CSV - " + str(int(time.time() - start)) + " seconds"
 export_columns = ["Property ID", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Contract date", "Settlement date", "Purchase price", "Zoning", "Primary purpose", "Strata lot number"]
 df.to_csv("extract-3-very-clean.csv", columns=export_columns)
 
-print("And we're done! Total time was "  + str(int(time.time() - start)) + " seconds")
+print("Data has been extracted and processed! Elapsed time was "  + str(int(time.time() - start)) + " seconds")
