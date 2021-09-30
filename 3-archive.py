@@ -18,4 +18,7 @@ zipfile.ZipFile(name_new + '.zip', mode='w').write(name_new + ".csv", compress_t
 
 os.rename(name_new + '.csv', name_original)
 
+# Also create a generic a copy that doesn't have the date attached
+os.system('cp ' + name_new + '.zip' + ' ' + 'archive.zip') 
+
 print("Archive has been created! Elapsed time was "  + str(int(time.time() - start)) + " seconds")
