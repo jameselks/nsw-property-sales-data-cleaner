@@ -23,7 +23,7 @@ d = datetime(this_year, 1, 7)
 offset = -d.weekday() #weekday = 0 means monday
 this_date = (d + timedelta(offset))
 
-while this_date < (now - timedelta(days=7)):
+while this_date < (now - timedelta(days=14)):
     this_date = this_date + timedelta(days=7)  
     download_url = url_base + url_base_weekly + this_date.strftime('%Y%m%d') + '.zip'
     print('Downloading... ' + download_url)
