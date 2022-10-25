@@ -1,6 +1,6 @@
 # 
 
-print('Hello! Python is up and running.')
+print('Start downloading the data')
 import time
 start = time.time()
 
@@ -26,12 +26,13 @@ this_date = (d + timedelta(offset))
 while this_date < (now - timedelta(days=14)):
     this_date = this_date + timedelta(days=7)  
     download_url = url_base + url_base_weekly + this_date.strftime('%Y%m%d') + '.zip'
-    print('Downloading... ' + download_url)
+    print('Downloading ' + download_url)
     urllib.request.urlretrieve(download_url, download_dir + this_date.strftime('%Y%m%d') + '.zip')
 
 for year in range(int(this_year-years_to_collect), int(this_year)):
     download_url = url_base + url_base_yearly + str(year) + '.zip'
-    print('Downloading... ' + download_url)
+    print('Downloading ' + download_url)
     urllib.request.urlretrieve(download_url, download_dir + str(year) + '.zip')
 
-print('Downloading complete')
+print('Complete: the data has been downloaded.')
+print('Total elapsed time was ' + str(int(time.time() - start)) + " seconds")

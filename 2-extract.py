@@ -1,6 +1,6 @@
 # 
 
-print('Hello! Python is up and running.')
+print('Start extracting and processing data')
 import time
 start = time.time()
 
@@ -25,28 +25,29 @@ def extract (filename):
                 if (os.path.splitext(file2)[1]).lower() == ".dat":
                     output_rawarr.append((zipInner.read(file2)).decode("utf-8") + "\n")
                 else:
-                    print("Ignored file - " + file2)
+                    print("Ignored file " + file2)
         else:
-            print("Ignored file - " + file)
+            print("Ignored file " + file)
 
     return
 
 for file in os.listdir(datadir):
     filename = os.fsdecode(file)
     if filename.endswith(".zip"):
-        print("Processing " + datadir + "/" + filename + " - " + str(int(time.time() - start)) + " seconds")
+        print("Processing " + datadir + "/" + filename)
         extract(datadir + "/" + filename)
 
 output_rawfile = ''.join(output_rawarr)
 f = open("extract-1-raw.txt", "w+")
 f.write(output_rawfile)
 f.close()
-print("Now compacting the data - " + str(int(time.time() - start)) + " seconds")
+print(str(int(time.time() - start)) + " seconds elapsed")
+print("Begin merging the data")
 
 outputarray = []
 outputfile = ""
 found = False
-print(len(output_rawfile.splitlines()))
+print('Merging ' + str(len(output_rawfile.splitlines())) + ' rows of data')
 for line in output_rawfile.splitlines():
     if line[0:1] == "B":
         outputarray.append("\n" + line)
@@ -61,8 +62,8 @@ f.write(outputfile)
 f.close()
 
 import pandas as pd
-
-print("And processing the data - " + str(int(time.time() - start)) + " seconds")
+print(str(int(time.time() - start)) + " seconds elapsed")
+print("Begin processing the data")
 
 #---
 # Import the data from the text file
@@ -95,9 +96,11 @@ df.loc[z, 'Zoning'] = df.loc[z, 'Zoning'].replace({'E2': 'C2', 'E3': 'C3', 'E4':
 
 #---
 # Exporting to a CSV for further analysis
-print("Finally exporting to CSV - " + str(int(time.time() - start)) + " seconds")
+print(str(int(time.time() - start)) + " seconds elapsed")
+print("Begin exporting to CSV")
 
 export_columns = ["Property ID", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Contract date", "Settlement date", "Purchase price", "Zoning", "Primary purpose", "Strata lot number"]
 df.to_csv("extract-3-very-clean.csv", columns=export_columns)
 
-print("Data has been extracted and processed! Elapsed time was "  + str(int(time.time() - start)) + " seconds")
+print("Complete: data has been extracted and processed.")
+print('Total elapsed time was ' + str(int(time.time() - start)) + " seconds")
