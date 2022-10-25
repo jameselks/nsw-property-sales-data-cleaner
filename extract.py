@@ -80,11 +80,18 @@ df = pd.read_csv("extract-2-clean.txt", delimiter=";", header=None, names=column
 # Convert hectares to square metres
 df.loc[df['Area type'] == "H", 'Area'] = df['Area'] * 10000
 df['Area'] = pd.to_numeric(df['Area'], errors='coerce')
+
 df['Property post code'] = pd.to_numeric(df['Property post code'], errors='coerce', downcast='float')
 df['Primary purpose'] = df['Primary purpose'].str.capitalize()
 df['Property name'] = df['Property name'].str.title()
 df['Property street name'] = df['Property street name'].str.title()
 df['Property locality'] = df['Property locality'].str.title()
+
+#Fix zoning
+#But only for vals before 1 Dec 2021
+#https://legislation.nsw.gov.au/view/pdf/asmade/epi-2021-650
+#df['Zoning'].loc[df['Contract date'] < pd.to_datetime('2021-12-01')] = df['Zoning'].replace({'E2': 'C2', 'E3': 'C3', 'E4': 'C4'})
+df['Zoning'] = df['Zoning'].loc[df['Contract date'] < pd.to_datetime('2021-12-01')].replace({'E2': 'C2', 'E3': 'C3', 'E4': 'C4'})
 
 #---
 # Exporting to a CSV for further analysis
