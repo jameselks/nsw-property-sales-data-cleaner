@@ -91,8 +91,9 @@ df['Property locality'] = df['Property locality'].str.title()
 #Fix zoning
 #But only for vals before 1 Dec 2021
 #https://legislation.nsw.gov.au/view/pdf/asmade/epi-2021-650
-z = df['Contract date'] < pd.to_datetime('2021-12-01')
-df.loc[z, 'Zoning'] = df.loc[z, 'Zoning'].replace({'E2': 'C2', 'E3': 'C3', 'E4': 'C4'})
+#This doesn't actually work - there's lots of overlap in the data, so I'm removing for now...
+#z = df['Contract date'] < pd.to_datetime('2021-12-01')
+#df.loc[z, 'Zoning'] = df.loc[z, 'Zoning'].replace({'E2': 'C2', 'E3': 'C3', 'E4': 'C4'})
 
 #---
 # Exporting to a CSV for further analysis
