@@ -94,6 +94,8 @@ df['Property locality'] = df['Property locality'].str.title()
 #This doesn't actually work - there's lots of overlap in the data, so I'm removing for now...
 #z = df['Contract date'] < pd.to_datetime('2021-12-01')
 #df.loc[z, 'Zoning'] = df.loc[z, 'Zoning'].replace({'E2': 'C2', 'E3': 'C3', 'E4': 'C4'})
+#MORE INFORMATION:
+#Disclaimer: The zone codes recorded in land value files are as recorded on the Register of Land Values on the date the data was extracted. Note that the Zone Code has been recorded for the purpose of making valuations under the Valuation of Land Act 1916 only. The Valuer General is not an authority on property zones and these codes should not be used as the basis for decisions regarding the potential use of land.
 
 #---
 # Exporting to a CSV for further analysis
