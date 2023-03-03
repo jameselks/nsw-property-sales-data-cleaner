@@ -25,16 +25,16 @@ def extract (filename):
                 if (os.path.splitext(file2)[1]).lower() == ".dat":
                     output_rawarr.append((zipInner.read(file2)).decode("utf-8") + "\n")
                 else:
-                    print("Ignored file " + file2)
+                    #print("Ignored file " + file2)
         else:
-            print("Ignored file " + file)
+            #print("Ignored file " + file)
 
     return
 
 for file in os.listdir(datadir):
     filename = os.fsdecode(file)
     if filename.endswith(".zip"):
-        print("Processing " + datadir + "/" + filename)
+        #print("Processing " + datadir + "/" + filename)
         extract(datadir + "/" + filename)
 
 output_rawfile = ''.join(output_rawarr)
