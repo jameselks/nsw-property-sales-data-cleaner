@@ -23,9 +23,7 @@ If you do code, you know what to do. If not, download Visual Studio Code and fol
 * VS Code popup will appear asking if you want to switch to this new interpreter, say Yes (if no popup then Ctrl + P, then type 'Python: Select interpreter')
 * Open Terminal (CTRL+\`) and activate virtual environment `$ .venv\Scripts\activate.bat`
 * Upgrade pip in your virtual environment `(.venv)$ pip install --upgrade pip` (don't worry about the error)
-* Install pandas in your virtual environment `(.venv)$ pip install pandas`
-* Install scipy in your virtual environment `(.venv)$ pip install scipy`
-* Install ploty.express in your virtual environment `(.venv)$ pip install plotly.express`
+* Install requiremented packages in your virtual environment `(.venv)$ pip install -r requirements.txt`
 * Then open `1-download.py` then right-click > Run Python > Run Python in Terminal
 * Same for `2-extract`
 * Then open `analysis.ipynb` and run each cell to generate graphs or whatever

@@ -1,1 +1,5 @@
 pandas
+scipy
+plotly.express
+numpy
+matplotlib
