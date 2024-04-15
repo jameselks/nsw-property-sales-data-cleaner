@@ -27,3 +27,20 @@ If you do code, you know what to do. If not, download Visual Studio Code and fol
 * Then open `1-download.py` then right-click > Run Python > Run Python in Terminal
 * Same for `2-extract`
 * Then open `analysis.ipynb` and run each cell to generate graphs or whatever
+
+## Valuer General documentation
+
+Sales data is available online via the Valuer General's [Bulk property sales information website](https://valuation.property.nsw.gov.au/embed/propertySalesInformation).
+
+I have included their documentation as part of this repository.
+
+### General information
+[Instructions](/Valuer%20General%20documentation/Property_Sales_Data_File_-_Instructions_V2.pdf) (PDF 63KB)
+
+### Technical documentation
+[Current property sales data file format (2001 to Current)](/Valuer%20General%20documentation/Current_Property_Sales_Data_File_Format_2001_to_Current.pdf) (PDF 75KB)
+[Archived property sales data file format (1990 to 2001)](/Valuer%20General%20documentation/Archived_Property_Sales_Data_File_Format_1990_to_2001_V2.pdf) (PDF 72KB)
+[Data elements](/Valuer%20General%20documentation/Property_Sales_Data_File_-_Data_Elements_V3.pdf) (PDF 66KB)
+[Property sales data file (District Codes and names)](/Valuer%20General%20documentation/Property_Sales_Data_File_District_Codes_and_Names.pdf) (PDF 75KB)
+[Property sales data file (Zone Codes and descriptions)](/Valuer%20General%20documentation/Property_Sales_Data_File_Zone_Codes_and_Descriptions_V2.pdf) (PDF 61KB)
+[Property sales information data files user guide](/Valuer%20General%20documentation/Property_Sales_Information_Data_Files_User_guide.pdf) (PDF 1.9MB)
