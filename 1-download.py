@@ -4,7 +4,6 @@ import urllib.request
 from urllib.error import URLError, HTTPError
 from datetime import date, timedelta
 import logging
-import concurrent.futures
 
 # Constants
 URL_BASE = 'https://www.valuergeneral.nsw.gov.au/__psi/'
@@ -12,7 +11,7 @@ WEEKLY_URL = URL_BASE + 'weekly/'
 YEARLY_URL = URL_BASE + 'yearly/'
 DOWNLOAD_DIR = 'data/'
 YEARS_TO_COLLECT = 6
-DAYS_TO_SKIP = 14
+RECENT_WEEKS_TO_EXCLUDE = 14  # Number of days to exclude from recent weekly downloads.
 RETRY_ATTEMPTS = 3
 
 # Configure logging
@@ -39,6 +38,7 @@ def download_file(url, filepath):
 
 def download_weekly_data(start_date, end_date):
     """Downloads weekly data files."""
+    end_date = end_date - timedelta(days=RECENT_WEEKS_TO_EXCLUDE)
     current_date = start_date
     while current_date < end_date:
         filename = current_date.strftime('%Y%m%d') + '.zip'
@@ -72,7 +72,7 @@ def main():
 
     today = date.today()
     start_weekly_date = date(today.year, 1, 7) - timedelta(days=date(today.year, 1, 7).weekday())
-    end_weekly_date = today - timedelta(days=DAYS_TO_SKIP)
+    end_weekly_date = today
 
     download_weekly_data(start_weekly_date, end_weekly_date)
     download_yearly_data(today.year - YEARS_TO_COLLECT, today.year)
