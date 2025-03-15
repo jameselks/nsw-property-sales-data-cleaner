@@ -30,14 +30,20 @@ while this_date < (now - timedelta(days=14)):
     this_date = this_date + timedelta(days=7)
     download_url = url_base + url_base_weekly + this_date.strftime('%Y%m%d') + '.zip'
     logging.info(f'Downloading {download_url}')
-    urllib.request.urlretrieve(download_url, download_dir + this_date.strftime('%Y%m%d') + '.zip')
-    logging.info(f'Downloaded {download_url} to {download_dir + this_date.strftime("%Y%m%d") + ".zip"}')
+    try:
+        urllib.request.urlretrieve(download_url, download_dir + this_date.strftime('%Y%m%d') + '.zip')
+        logging.info(f'Downloaded {download_url} to {download_dir + this_date.strftime("%Y%m%d") + ".zip"}')
+    except Exception as e:
+        logging.error(f'Error downloading {download_url}: {e}')
 
 for year in range(int(this_year-years_to_collect), int(this_year)):
     download_url = url_base + url_base_yearly + str(year) + '.zip'
     logging.info(f'Downloading {download_url}')
-    urllib.request.urlretrieve(download_url, download_dir + str(year) + '.zip')
-    logging.info(f'Downloaded {download_url} to {download_dir + str(year) + ".zip"}')
+    try:
+        urllib.request.urlretrieve(download_url, download_dir + str(year) + '.zip')
+        logging.info(f'Downloaded {download_url} to {download_dir + str(year) + ".zip"}')
+    except Exception as e:
+        logging.error(f'Error downloading {download_url}: {e}')
 
 logging.info('Complete: the data has been downloaded.')
 logging.info(f'Total elapsed time was {int(time.time() - start)} seconds')
