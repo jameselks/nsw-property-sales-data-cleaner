@@ -6,13 +6,14 @@ import csv
 import pandas as pd
 import time
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
+# Constants
 DATA_DIR = "./data"
 RAW_FILE_PATH = "extract-1-raw.txt"
 CLEAN_FILE_PATH = "extract-2-clean.txt"
 FINAL_CSV_PATH = "extract-3-very-clean.csv"
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def extract_data_from_zip(zip_filepath):
     """Extracts .dat files from a zip archive, including nested zips."""
