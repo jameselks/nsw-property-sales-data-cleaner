@@ -54,7 +54,9 @@ def process_data(clean_file_path):
     column_names = ["Record type", "District code", "Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Nature of property", "Primary purpose", "Strata lot number", "Component code", "Sale code", "% interest of sale", "Dealing number", "Property legal description"]
     include_columns = ["Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Primary purpose", "Strata lot number", "Property legal description"]
 
-    df = pd.read_csv(clean_file_path, delimiter=";", header=None, names=column_names, encoding='utf8', usecols=include_columns, parse_dates=columns_with_dates, date_parser=date_converter, quoting=csv.QUOTE_NONE)
+    df = pd.read_csv(clean_file_path, delimiter=";", header=None, names=column_names, encoding='utf8', usecols=include_columns, parse_dates=columns_with_dates, quoting=csv.QUOTE_NONE)
+    for col in columns_with_dates:
+      df[col] = pd.to_datetime(df[col], format="%Y%m%d", errors='coerce')
 
     # Processing the data
     df.loc[df['Area type'] == "H", 'Area'] = df['Area'] * 10000
