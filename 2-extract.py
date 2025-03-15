@@ -1,13 +1,15 @@
-# 
-
-print('Start extracting and processing data')
-import time
-start = time.time()
-
+import logging
 import os
 import io
 import zipfile
 import csv
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+logging.info('Start extracting and processing data')
+import time
+start = time.time()
 
 datadir = "./data"
 
@@ -25,29 +27,29 @@ def extract (filename):
                 if (os.path.splitext(file2)[1]).lower() == ".dat":
                     output_rawarr.append((zipInner.read(file2)).decode("utf-8") + "\n")
                 else:
-                    print("Ignored file " + file2)
+                    logging.info("Ignored file " + file2)
         else:
-            print("Ignored file " + file)
+            logging.info("Ignored file " + file)
 
     return
 
 for file in os.listdir(datadir):
     filename = os.fsdecode(file)
     if filename.endswith(".zip"):
-        #print("Processing " + datadir + "/" + filename)
+        #logging.info("Processing " + datadir + "/" + filename)
         extract(datadir + "/" + filename)
 
 output_rawfile = ''.join(output_rawarr)
 f = open("extract-1-raw.txt", "w+")
 f.write(output_rawfile)
 f.close()
-print(str(int(time.time() - start)) + " seconds elapsed")
-print("Begin merging the data")
+logging.info(str(int(time.time() - start)) + " seconds elapsed")
+logging.info("Begin merging the data")
 
 outputarray = []
 outputfile = ""
 found = False
-print('Merging ' + str(len(output_rawfile.splitlines())) + ' rows of data')
+logging.info('Merging ' + str(len(output_rawfile.splitlines())) + ' rows of data')
 for line in output_rawfile.splitlines():
     if line[0:1] == "B":
         outputarray.append("\n" + line)
@@ -62,8 +64,8 @@ f.write(outputfile)
 f.close()
 
 import pandas as pd
-print(str(int(time.time() - start)) + " seconds elapsed")
-print("Begin processing the data")
+logging.info(str(int(time.time() - start)) + " seconds elapsed")
+logging.info("Begin processing the data")
 
 #---
 # Import the data from the text file
@@ -99,11 +101,11 @@ df['Property locality'] = df['Property locality'].str.title()
 
 #---
 # Exporting to a CSV for further analysis
-print(str(int(time.time() - start)) + " seconds elapsed")
-print("Begin exporting to CSV")
+logging.info(str(int(time.time() - start)) + " seconds elapsed")
+logging.info("Begin exporting to CSV")
 
 export_columns = ["Property ID", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Contract date", "Settlement date", "Purchase price", "Zoning", "Primary purpose", "Strata lot number"]
 df.to_csv("extract-3-very-clean.csv", columns=export_columns)
 
-print("Complete: data has been extracted and processed.")
-print('Total elapsed time was ' + str(int(time.time() - start)) + " seconds")
+logging.info("Complete: data has been extracted and processed.")
+logging.info('Total elapsed time was ' + str(int(time.time() - start)) + " seconds")
