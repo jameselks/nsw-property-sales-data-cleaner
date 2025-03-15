@@ -69,6 +69,7 @@ def process_data(clean_file_path):
     df['Property locality'] = df['Property locality'].str.title()
 
     # Zoning logic removed as it was not working as expected.
+    
     return df
 
 def main():
