@@ -43,11 +43,8 @@ def download_weekly_data(start_date, end_date):
     while current_date < end_date:
         filename = current_date.strftime('%Y%m%d') + '.zip'
         filepath = os.path.join(DOWNLOAD_DIR, filename)
-        if not os.path.exists(filepath):
-            url = WEEKLY_URL + filename
-            download_file(url, filepath)
-        else:
-            logging.info(f"File {filepath} already exists. Skipping.")
+        url = WEEKLY_URL + filename
+        download_file(url, filepath)
         current_date += timedelta(days=7)
 
 def download_yearly_data(start_year, end_year):
@@ -55,11 +52,8 @@ def download_yearly_data(start_year, end_year):
     for year in range(start_year, end_year):
         filename = str(year) + '.zip'
         filepath = os.path.join(DOWNLOAD_DIR, filename)
-        if not os.path.exists(filepath):
-            url = YEARLY_URL + filename
-            download_file(url, filepath)
-        else:
-            logging.info(f"File {filepath} already exists. Skipping.")
+        url = YEARLY_URL + filename
+        download_file(url, filepath)
 
 def main():
     """Main function to download data."""
