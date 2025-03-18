@@ -53,7 +53,7 @@ def process_data(clean_file_path):
     date_converter = lambda x: pd.to_datetime(x, format="%Y%m%d", errors='coerce')
     columns_with_dates = ["Contract date", "Settlement date"]
     column_names = ["Record type", "District code", "Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Nature of property", "Primary purpose", "Strata lot number", "Component code", "Sale code", "Per cent interest of sale", "Dealing number", "Property legal description"]
-    include_columns = ["Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number",                              "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Nature of property", "Primary purpose", "Strata lot number", "Dealing number", "Property legal description"]
+    include_columns = ["Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Nature of property", "Primary purpose", "Strata lot number", "Dealing number", "Property legal description"]
 
     df = pd.read_csv(clean_file_path, delimiter=";", header=None, names=column_names, encoding='utf8', usecols=include_columns, parse_dates=columns_with_dates, quoting=csv.QUOTE_NONE)
     for col in columns_with_dates:
