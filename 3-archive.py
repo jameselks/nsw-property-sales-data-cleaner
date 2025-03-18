@@ -5,7 +5,7 @@ import zipfile
 from datetime import datetime
 #
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='propsales.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 logging.info('Creating zip archive')
 start = time.time()

@@ -13,7 +13,7 @@ CLEAN_FILE_PATH = "extract-2-clean.txt"
 FINAL_CSV_PATH = "extract-3-very-clean.csv"
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='propsales.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def extract_data_from_zip(zip_filepath):
     """Extracts .dat files from a zip archive, including nested zips."""
@@ -28,10 +28,6 @@ def extract_data_from_zip(zip_filepath):
                         for inner_file_info in inner_zip.namelist():
                             if inner_file_info.lower().endswith(".dat"):
                                 raw_data_lines.append(inner_zip.read(inner_file_info).decode("utf-8") + "\n")
-                            else:
-                                logging.info(f"Ignored inner zip file: {inner_file_info}")
-                else:
-                    logging.info(f"Ignored file: {file_info}")
     except FileNotFoundError:
         logging.error(f"File not found: {zip_filepath}")
     except zipfile.BadZipFile:
