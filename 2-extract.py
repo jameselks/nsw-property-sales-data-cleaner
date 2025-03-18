@@ -52,8 +52,8 @@ def process_data(clean_file_path):
     """Processes the cleaned data using pandas."""
     date_converter = lambda x: pd.to_datetime(x, format="%Y%m%d", errors='coerce')
     columns_with_dates = ["Contract date", "Settlement date"]
-    column_names = ["Record type", "District code", "Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Nature of property", "Primary purpose", "Strata lot number", "Component code", "Sale code", "% interest of sale", "Dealing number", "Property legal description"]
-    include_columns = ["Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Primary purpose", "Strata lot number", "Property legal description"]
+    column_names = ["Record type", "District code", "Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Nature of property", "Primary purpose", "Strata lot number", "Component code", "Sale code", "Per cent interest of sale", "Dealing number", "Property legal description"]
+    include_columns = ["Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number",                              "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Nature of property", "Primary purpose", "Strata lot number", "Dealing number", "Property legal description"]
 
     df = pd.read_csv(clean_file_path, delimiter=";", header=None, names=column_names, encoding='utf8', usecols=include_columns, parse_dates=columns_with_dates, quoting=csv.QUOTE_NONE)
     for col in columns_with_dates:
@@ -105,7 +105,7 @@ def main():
     logging.info(f"{int(time.time() - start_time)} seconds elapsed")
     logging.info("Begin exporting to CSV")
 
-    export_columns = ["Property ID", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Contract date", "Settlement date", "Purchase price", "Zoning", "Primary purpose", "Strata lot number"]
+    export_columns = ["Property ID", "Sale counter", "Download date / time", "Property name", "Property unit number", "Property house number", "Property street name", "Property locality", "Property post code", "Area", "Area type", "Contract date", "Settlement date", "Purchase price", "Zoning", "Nature of property", "Primary purpose", "Strata lot number", "Dealing number", "Property legal description"]
     df.to_csv(FINAL_CSV_PATH, columns=export_columns, index=False)
 
     logging.info("Complete: data has been extracted and processed.")
