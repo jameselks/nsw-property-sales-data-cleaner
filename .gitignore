@@ -10,3 +10,4 @@ extract-*.txt
 data/
 property-sales-data-*
 nsw-property-sales-data-*.zip
+*.log
