@@ -13,7 +13,7 @@ CLEAN_FILE_PATH = "extract-2-clean.txt"
 FINAL_CSV_PATH = "extract-3-very-clean.csv"
 
 # Configure logging
-logging.basicConfig(filename='propsales.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', handlers=[logging.FileHandler("propsales.log"), logging.StreamHandler()])
 
 def extract_data_from_zip(zip_filepath):
     """Extracts .dat files from a zip archive, including nested zips."""

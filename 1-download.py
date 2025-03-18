@@ -15,7 +15,7 @@ RECENT_WEEKS_TO_EXCLUDE = 14  # Number of days to exclude from recent weekly dow
 RETRY_ATTEMPTS = 3
 
 # Configure logging
-logging.basicConfig(filename='propsales.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', handlers=[logging.FileHandler("propsales.log"), logging.StreamHandler()])
 
 def download_file(url, filepath):
     """Downloads a file from a URL to a specified filepath."""
