@@ -9,7 +9,7 @@ from datetime import datetime
 
 # --- Constants ---
 DATA_DIR = "./data"
-FINAL_CSV_PATH = "property_sales_data.csv"
+FINAL_CSV_PATH = "extract-3-very-clean.csv"
 LOG_FILE_PATH = "propsales.log"
 # --- Filtering Controls ---
 # Set to True to remove records with contract dates in the future
