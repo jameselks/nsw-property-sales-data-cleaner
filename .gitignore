@@ -1,13 +1,64 @@
-venv/
-.venv
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
 .idea/
-extract-*.txt
-*extract-*.csv
-*.xlsx
-*.html
-.vscode/settings.json
-data/
-property-sales-data-*
-nsw-property-sales-data-*.zip
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
 *.log
+
+# Data files
+data/
+*.csv
+*.xlsx
+*.xls
+*.json
+
+# Analysis outputs
+eastern_suburbs_analysis/
+src/data/
+src/analysis/eastern_suburbs_analysis/
+
+# Test files
+test_*.py
+*_test.py
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
