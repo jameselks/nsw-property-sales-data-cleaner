@@ -10,7 +10,7 @@ URL_BASE = 'https://www.valuergeneral.nsw.gov.au/__psi/'
 WEEKLY_URL = URL_BASE + 'weekly/'
 YEARLY_URL = URL_BASE + 'yearly/'
 DOWNLOAD_DIR = 'data/'
-YEARS_TO_COLLECT = 35
+YEARS_TO_COLLECT = 7
 RECENT_WEEKS_TO_EXCLUDE = 14  # Number of days to exclude from recent weekly downloads.
 RETRY_ATTEMPTS = 3
 

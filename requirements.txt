@@ -3,3 +3,5 @@ scipy
 plotly.express
 numpy
 matplotlib
+requests
+beautifulsoup4
