@@ -444,3 +444,74 @@ def test_build_dataframe_honours_the_cutoff(extract_mod, tmp_path, monkeypatch):
     ids = set(df['Property ID'].astype(str))
     assert '2021001' in ids, 'the kept year must still be read'
     assert '2019001' not in ids, 'the skipped year must contribute nothing'
+
+
+# ------------------------------------- multi-parcel dealings (A3 follow-up) --
+# One dealing routinely covers several parcels, each its own row. Keyed on
+# (Property ID, Dealing number) alone, all but one parcel is destroyed - 22,978
+# real records across 2019-2026. The legal description has to be in the key.
+
+def test_separate_parcels_of_one_dealing_all_survive(extract_mod, tmp_path):
+    """
+    The real case: property 3200869, dealing AN975735, strata lots 5 and 6 of
+    SP75684 - two different units in one building sold together.
+    """
+    from conftest import make_b_record, make_c_record, make_dat, write_yearly_zip
+
+    b5 = make_b_record(prop_id='3200869', counter='5', unit='5',
+                       dealing='AN975735', price='685000')
+    b6 = make_b_record(prop_id='3200869', counter='6', unit='6',
+                       dealing='AN975735', price='685000')
+    c5 = make_c_record('5/SP75684', prop_id='3200869', counter='5')
+    c6 = make_c_record('6/SP75684', prop_id='3200869', counter='6')
+
+    write_yearly_zip(str(tmp_path / '2019.zip'),
+                     {'w.zip': {'a.dat': make_dat([b5, b6], [c5, c6])}})
+
+    df = extract_mod.build_dataframe(str(tmp_path))
+
+    assert len(df) == 2, 'both strata lots must survive - they are different units'
+    assert set(df['Property legal description']) == {'5/SP75684', '6/SP75684'}
+
+
+def test_the_same_parcel_twice_is_still_collapsed(extract_mod, tmp_path):
+    """
+    The other half. Same parcel re-recorded under a different Sale counter,
+    identical in every other field, is a duplicate and must go. This is why the
+    key uses the legal description rather than the sale counter.
+    """
+    from conftest import make_b_record, make_c_record, make_dat, write_yearly_zip
+
+    b1 = make_b_record(prop_id='4157689', counter='1', dealing='AN974420',
+                       price='335000')
+    b5 = make_b_record(prop_id='4157689', counter='5', dealing='AN974420',
+                       price='335000')
+    c1 = make_c_record('23/1229878', prop_id='4157689', counter='1')
+    c5 = make_c_record('23/1229878', prop_id='4157689', counter='5')
+
+    write_yearly_zip(str(tmp_path / '2019.zip'),
+                     {'w.zip': {'a.dat': make_dat([b1, b5], [c1, c5])}})
+
+    df = extract_mod.build_dataframe(str(tmp_path))
+
+    assert len(df) == 1, 'same parcel under two sale counters is one record'
+
+
+def test_parcels_in_sale_counts_the_surviving_rows(extract_mod, tmp_path):
+    """
+    'Parcels in sale' is computed after dedup, so destroying parcel rows also
+    understates this column. Two parcels must report 2, not 1.
+    """
+    from conftest import make_b_record, make_c_record, make_dat, write_yearly_zip
+
+    b5 = make_b_record(prop_id='3200869', counter='5', dealing='AN975735')
+    b6 = make_b_record(prop_id='3200869', counter='6', dealing='AN975735')
+    c5 = make_c_record('5/SP75684', prop_id='3200869', counter='5')
+    c6 = make_c_record('6/SP75684', prop_id='3200869', counter='6')
+
+    write_yearly_zip(str(tmp_path / '2019.zip'),
+                     {'w.zip': {'a.dat': make_dat([b5, b6], [c5, c6])}})
+
+    df = extract_mod.build_dataframe(str(tmp_path))
+
+    assert set(df['Parcels in sale']) == {2}

@@ -28,7 +28,8 @@ Key Pipeline Stages:
        fix_title_case(), which repairs what `.str.title()` gets wrong.
      - Deduplication: Removes overlapping sales across annual and weekly batches.
        Records that carry a dealing number are keyed on (Property ID, Dealing
-       number); pre-2001 records, which have none, fall back to ARCHIVED_DEDUP_KEY.
+       number and legal description, see MODERN_DEDUP_KEY); pre-2001 records,
+       which have no dealing number, fall back to ARCHIVED_DEDUP_KEY.
   4. Derived columns (schema v2):
      - Plain-English companions for the two coded columns ('Nature of property',
        'Primary purpose'). The raw values are always kept alongside them.
@@ -74,6 +75,32 @@ ARCHIVED_DEDUP_KEY = [
     'Property street name', 'Property house number',
     'Property legal description', 'Property locality', 'Area',
 ]
+
+# Post-2001 records. The legal description is in the key because one dealing
+# routinely covers several parcels, and each parcel is its own row.
+#
+# Measured on 2019-2026 (1,605,876 raw rows), a (Property ID, Dealing number)
+# key destroyed 22,978 real records. Example: property 3200869, dealing
+# AN975735 covers strata lots 5/SP75684 AND 6/SP75684 - two different units in
+# one building, sold together. Keyed without the legal description, unit 6
+# silently disappears.
+#
+# Two patterns share the shape "one dealing, several rows", and the key has to
+# tell them apart:
+#
+#   1. Different parcels - different legal descriptions. 14,603 groups. Both
+#      rows are real and must survive.
+#   2. The same parcel recorded twice under different Sale counters, identical
+#      in every other field. 36,752 groups. One must go.
+#
+# The legal description separates them exactly: it keeps 14,603/14,603 of the
+# first and collapses 36,751/36,752 of the second. Adding 'Sale counter'
+# instead was tried and rejected - it keeps the distinct parcels but collapses
+# NONE of the repeats, leaving 101,295 duplicate rows in the output.
+#
+# Only 30 rows in 1.6M have no legal description, so a blank key value is not a
+# meaningful risk here.
+MODERN_DEDUP_KEY = ['Property ID', 'Dealing number', 'Property legal description']
 
 # Every column the two parsers can produce, i.e. everything clean_dataframe()
 # reads before it starts deriving new columns of its own.
@@ -764,10 +791,12 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     # misfile tens of thousands of rows.
     has_dealing = df['Dealing number'].notna() & (df['Dealing number'] != '')
 
-    # Post-2001 records: one dealing number is one sale of one property. This
-    # catches sales the Valuer General later restated with a corrected date.
+    # Post-2001 records: one dealing covering one parcel is one sale. This
+    # catches sales the Valuer General later restated with a corrected date,
+    # while keeping the separate parcels of a multi-parcel dealing. See
+    # MODERN_DEDUP_KEY for why the legal description has to be in the key.
     deduped_with_dealing = df[has_dealing].drop_duplicates(
-        subset=['Property ID', 'Dealing number'], keep='last'
+        subset=MODERN_DEDUP_KEY, keep='last'
     )
 
     # Pre-2001 archived records have no dealing number, so fall back to the
