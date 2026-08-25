@@ -1,5 +1,28 @@
-pandas
-scipy
-plotly.express
-numpy
-matplotlib
+# Pinned deliberately. This pipeline runs unattended from cron every morning,
+# so an upstream point release changing a default would land in production
+# without anyone choosing it. To upgrade: bump a version here, run the tests,
+# then re-run the full pipeline and check the row count is unchanged.
+#
+# Verified working together on 2026-08-21 against the full 36-year corpus.
+
+pandas==3.0.5
+numpy==2.5.2
+plotly==6.9.0
+
+# Not imported by our code, but pandas uses it automatically for string columns
+# when it is installed. On the full 36-year corpus that cut peak memory from
+# 11.0 GB to 6.3 GB with no code change at all.
+pyarrow==25.0.1
+
+# analysis.ipynb only - not needed to run the pipeline. plotly's fig.show()
+# refuses to render inside a notebook without it ("Mime type rendering requires
+# nbformat>=4.2.0"), and nothing else in the chain pulls it in.
+nbformat==5.11.1
+
+# Test suite only - not needed to run the pipeline.
+pytest==9.1.1
+
+# Deliberately absent, so nobody adds them back on a hunch:
+#   scipy      - the notebook finds outliers with an IQR fence on log prices,
+#                which is plain numpy. Nothing here needs scipy.
+#   matplotlib - the notebook charts with plotly. Nothing imports matplotlib.
