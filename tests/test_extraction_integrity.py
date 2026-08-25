@@ -379,3 +379,68 @@ def test_parcels_in_sale_is_null_without_a_dealing_number(extract_mod):
     records = extract_mod.parse_data_lines([make_archived_b_record(prop_id="99")])
     df = extract_mod.create_and_clean_dataframe(records)
     assert pd.isna(df["Parcels in sale"].iloc[0])
+
+
+# ------------------------------------------- EARLIEST_EXTRACT_YEAR filter ---
+# The trap this guards: EARLIEST_DATE looks like it limits the dataset to recent
+# years. It does not - it blanks out dates and keeps every row. This is the
+# control that actually skips files.
+
+def test_yearly_archives_before_the_cutoff_are_skipped(extract_mod, monkeypatch):
+    monkeypatch.setattr(extract_mod, 'EARLIEST_EXTRACT_YEAR', 2020)
+    assert extract_mod.should_skip_archive('2019.zip')
+    assert extract_mod.should_skip_archive('1990.zip')
+
+
+def test_the_cutoff_year_itself_is_kept(extract_mod, monkeypatch):
+    """An off-by-one here silently drops or adds a whole year of sales."""
+    monkeypatch.setattr(extract_mod, 'EARLIEST_EXTRACT_YEAR', 2020)
+    assert not extract_mod.should_skip_archive('2020.zip')
+    assert not extract_mod.should_skip_archive('2025.zip')
+
+
+def test_weekly_files_are_never_skipped(extract_mod, monkeypatch):
+    """
+    Weekly files are named YYYYMMDD.zip. Read as a year that is a nonsense
+    number in the millions, so a naive int() comparison would keep them by
+    accident - but only by accident. They must be kept deliberately.
+    """
+    monkeypatch.setattr(extract_mod, 'EARLIEST_EXTRACT_YEAR', 2020)
+    assert not extract_mod.should_skip_archive('20260824.zip')
+    assert not extract_mod.should_skip_archive('20190104.zip')
+
+
+def test_nothing_is_skipped_when_the_filter_is_off(extract_mod, monkeypatch):
+    """None means process everything - the default, and what production uses."""
+    monkeypatch.setattr(extract_mod, 'EARLIEST_EXTRACT_YEAR', None)
+    assert not extract_mod.should_skip_archive('1990.zip')
+    assert not extract_mod.should_skip_archive('20260824.zip')
+
+
+def test_unexpected_filenames_are_processed_not_guessed_at(extract_mod, monkeypatch):
+    """Anything that isn't clearly a yearly archive gets read, not discarded."""
+    monkeypatch.setattr(extract_mod, 'EARLIEST_EXTRACT_YEAR', 2020)
+    assert not extract_mod.should_skip_archive('archive.zip')
+    assert not extract_mod.should_skip_archive('2019-revised.zip')
+    # Only an exactly-four-digit name counts as a year. Without that check,
+    # int('999') is less than the cutoff and this file vanishes silently.
+    assert not extract_mod.should_skip_archive('999.zip')
+
+
+def test_build_dataframe_honours_the_cutoff(extract_mod, tmp_path, monkeypatch):
+    """End to end: an old yearly archive must not contribute any records."""
+    from conftest import make_b_record, make_dat, write_yearly_zip
+
+    for year in ('2019', '2021'):
+        write_yearly_zip(str(tmp_path / f'{year}.zip'), {
+            f'{year}week.zip': {
+                f'{year}.dat': make_dat([make_b_record(prop_id=f'{year}001')])
+            }
+        })
+
+    monkeypatch.setattr(extract_mod, 'EARLIEST_EXTRACT_YEAR', 2020)
+    df = extract_mod.build_dataframe(str(tmp_path))
+
+    ids = set(df['Property ID'].astype(str))
+    assert '2021001' in ids, 'the kept year must still be read'
+    assert '2019001' not in ids, 'the skipped year must contribute nothing'

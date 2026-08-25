@@ -6,12 +6,33 @@
 # Verified working together on 2026-08-21 against the full 36-year corpus.
 
 pandas==3.0.5
-numpy==2.5.2
 plotly==6.9.0
+
+# NOT numpy 2.x, deliberately - do not "upgrade" this without reading on.
+#
+# The numpy 2.x Linux wheels are compiled with an x86-64-v2 baseline (SSE4.2,
+# POPCNT). The production cPanel box does not have it, so merely importing
+# pandas dies with:
+#
+#   RuntimeError: NumPy was built with baseline optimizations: (X86_V2)
+#   but your machine doesn't support: (X86_V2).
+#
+# Note it installs perfectly happily and only fails at import, so a green
+# `pip install` proves nothing here.
+#
+# 1.26.4 is the newest release that still ships a wheel that machine can run,
+# and pandas 3.0.5 accepts numpy>=1.26.0 on Python 3.12. Verified on this
+# pairing: 104/104 tests pass and the full corpus reads correctly.
+numpy==1.26.4
 
 # Not imported by our code, but pandas uses it automatically for string columns
 # when it is installed. On the full 36-year corpus that cut peak memory from
 # 11.0 GB to 6.3 GB with no code change at all.
+#
+# Optional - pandas 3.0.5 does not require it, and everything works without it
+# (just hungrier). If the server hits the same x86-64-v2 wall described above,
+# uninstalling pyarrow there is a legitimate fix; check the memory headroom on
+# a full run if you do, because that 11 GB figure is the one you get back.
 pyarrow==25.0.1
 
 # analysis.ipynb only - not needed to run the pipeline. plotly's fig.show()

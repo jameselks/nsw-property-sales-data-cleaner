@@ -58,13 +58,13 @@ Two columns were also renamed: `Area` is now `Area (m2)` and `Area type` is now 
 * `3-publish.py` is new, and replaces the old `3-archive.py`. It runs six checks over the finished dataset and refuses to package anything that fails one. Checking and packaging sit in the same file on purpose - as two separate scripts, the checks could be skipped by forgetting a line in a cron job.
 * The cron job chains with `&&`, so a failure stops the line instead of publishing anyway.
 * Downloads are cached, written atomically, and time out - a half-written file can't be mistaken for a good one.
-* There are now 102 automated tests. There were none at all before - see below.
+* There are now 104 automated tests. There were none at all before - see below.
 
 ## Install
 
 If you do code, you know what to do. If not, download Visual Studio Code and follow these prompts.
 
-* Install Python 3.10 or newer (if VS Code is already open, restart it or it won't recognise Python)
+* Install Python 3.12 (if VS Code is already open, restart it or it won't recognise Python). Pandas needs 3.11 as a hard minimum; 3.12 is what this is tested against.
 * Copy this project to a folder, open the folder in VS Code
 * Open Terminal (CTRL+\`) and create a virtual environment: `py -3 -m venv .venv`
 * A popup will ask if you want to switch to the new interpreter - say yes (no popup? Ctrl+P, then `Python: Select interpreter`)
@@ -116,18 +116,21 @@ Sales data comes from the Valuer General's [bulk property sales information webs
 Chain the scripts with `&&`. Not `;`, and not separate cron lines.
 
 ```bash
-cd /home/jameselk/sites/nswpropertysalesdata.com-ops/pythonapp \
+cd /home/jameselk/sites/nswpropertysalesdata.com-ops/pythonapp/ \
+  && source /home/jameselk/virtualenv/sites/nswpropertysalesdata.com-ops/pythonapp/3.12/bin/activate \
   && python 1-download.py \
   && python 2-extract.py \
-  && python 3-publish.py
+  && python 3-publish.py \
+  && cp archive.zip /home/jameselk/sites/nswpropertysalesdata.com/data/archive.zip
 ```
 
-`&&` is what makes a failure stop the line. With `;` a failed download still gets extracted, and an extract that produced nothing still gets published - which is exactly how the site served stale data for 81 days.
+`&&` is what makes a failure stop the line, and that includes the last step - the `cp` only runs if everything before it worked, so a bad dataset never reaches the live site.
 
 Only relevant if you're deploying to cPanel like I am:
 
 * `.cpanel.yml` copies only the files it names. A new script needs a new `cp` line, or the server quietly keeps running the old pipeline. This is half the reason the checks live inside `3-publish.py` - a gate you have to remember in two places is a gate that eventually gets forgotten in one.
-* It doesn't run `pip install`. Versions are pinned in `requirements.txt` but have to be installed on the server by hand after a bump.
+* It doesn't run `pip install`. Versions are pinned in `requirements.txt` but have to be installed on the server by hand after a bump, into a Python 3.12 virtualenv.
+* **Check imports, not just installs, after a dependency bump.** My server has an old CPU with no x86-64-v2 support, so numpy 2.x installs cleanly and then dies the moment anything imports pandas. The pin in `requirements.txt` explains it. `python -c "import pandas"` is the ten-second test.
 * **Nothing in `data/` is ever deleted, deliberately.** Last year's weekly files are superseded by the annual archives and could in principle be cleaned up, but the source is behind a Cloudflare bot challenge, so anything removed can't currently be re-fetched. A stale file on disk beats 150 MB of free space. Revisit if the block lifts.
 * `validation-baseline.json` is deliberately not committed. It records row counts from whichever machine wrote it, so a local baseline built from the full corpus would clobber the server's and fail the next production run for no reason.
 
@@ -141,7 +144,7 @@ The point isn't ceremony. This pipeline runs unattended overnight, and every fai
 pytest
 ```
 
-102 of them, about a second. Worth running before you change anything and after.
+104 of them, about a second. Worth running before you change anything and after.
 
 If you're adding one: write it before the fix and watch it fail first. A test that has never failed isn't proving anything - I shipped one early on that passed against the broken code and told me nothing.
 

@@ -158,13 +158,32 @@ NON_MARKET_PRICE_THRESHOLD = 1000
 # --- Filtering & Data Quality Controls ---
 # Set to True to nullify records with contract and settlement dates in the future
 NULL_FUTURE_DATES = True
-# Set to True to nullify records with contract and settlement dates before EARLIEST_DATE
-NULL_PRE_1990_DATES = True
+# Set to True to nullify contract and settlement dates outside the valid range.
+NULL_OUT_OF_RANGE_DATES = True
 
 # The Valuer General published no sales data before 1990, so any earlier date is a
-# data entry error. This is a DATA QUALITY control and is separate from (but should
-# match) EARLIEST_YEAR in 1-download.py, which controls how far back we fetch files.
+# data entry error.
+#
+# READ THIS BEFORE CHANGING IT. This is a DATA QUALITY control, not a filter. A
+# row with an earlier date keeps every one of its other fields and stays in the
+# output - it just has an empty date afterwards. Setting this to, say,
+# '2019-01-01' does NOT give you a 2019-onwards dataset; it gives you the same
+# dataset with a few hundred thousand blank contract dates in it.
+#
+# If what you want is less data, use EARLIEST_EXTRACT_YEAR below.
 EARLIEST_DATE = '1990-01-01'
+
+# Skip yearly archives older than this - they are never opened, so this saves
+# both time and memory. Set to None to process everything in DATA_DIR.
+#
+# This is the knob for "I only want recent data", and it is the one that
+# actually works. It exists because nothing in data/ is ever deleted (the source
+# is Cloudflare-blocked, so a deleted archive cannot be re-fetched), which means
+# limiting the dataset by removing files is not an option.
+#
+# Only yearly archives ('2019.zip') are affected. Weekly files ('20260824.zip')
+# are always current-year and are always processed.
+EARLIEST_EXTRACT_YEAR = None
 
 # --- Configure Logging ---
 logging.basicConfig(
@@ -689,21 +708,24 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
             df.loc[future_settlement, 'Settlement date'] = pd.NaT
             logging.info(f"Nulled out {count} future Settlement dates.")
 
-    # Null out dates before 1990 (records before NSW Valuer General electronic archives)
-    if NULL_PRE_1990_DATES:
+    # Null out dates before EARLIEST_DATE (i.e. before the Valuer General's
+    # electronic archives begin). The message quotes the constant rather than
+    # hard-coding 1990 - if someone changes EARLIEST_DATE, a log that still says
+    # "pre-1990" sends them looking in the wrong place.
+    if NULL_OUT_OF_RANGE_DATES:
         earliest_date = pd.to_datetime(EARLIEST_DATE).normalize()
 
-        pre_1990_contract = df['Contract date'] < earliest_date
-        if pre_1990_contract.any():
-            count = pre_1990_contract.sum()
-            df.loc[pre_1990_contract, 'Contract date'] = pd.NaT
-            logging.info(f"Nulled out {count} pre-1990 Contract dates.")
+        early_contract = df['Contract date'] < earliest_date
+        if early_contract.any():
+            count = early_contract.sum()
+            df.loc[early_contract, 'Contract date'] = pd.NaT
+            logging.info(f"Nulled out {count} Contract dates before {EARLIEST_DATE}.")
 
-        pre_1990_settlement = df['Settlement date'] < earliest_date
-        if pre_1990_settlement.any():
-            count = pre_1990_settlement.sum()
-            df.loc[pre_1990_settlement, 'Settlement date'] = pd.NaT
-            logging.info(f"Nulled out {count} pre-1990 Settlement dates.")
+        early_settlement = df['Settlement date'] < earliest_date
+        if early_settlement.any():
+            count = early_settlement.sum()
+            df.loc[early_settlement, 'Settlement date'] = pd.NaT
+            logging.info(f"Nulled out {count} Settlement dates before {EARLIEST_DATE}.")
 
     # --- 3. Metric Normalization: Hectares (H) to Square Metres (m²) ---
     # Keep the untouched source number as well as the converted one. Before v2
@@ -855,6 +877,30 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     return df[final_columns]
 
 
+def should_skip_archive(file_name: str) -> bool:
+    """
+    True if this file is a yearly archive from before EARLIEST_EXTRACT_YEAR.
+
+    Yearly archives are named 'YYYY.zip'. Weekly files are 'YYYYMMDD.zip' and are
+    never skipped - they only ever contain current-year sales. Anything that
+    matches neither shape is processed rather than guessed at.
+
+    Args:
+        file_name (str): Bare filename, e.g. '2019.zip'.
+
+    Returns:
+        bool: True to skip the file entirely.
+    """
+    if EARLIEST_EXTRACT_YEAR is None:
+        return False
+
+    stem = os.path.splitext(file_name)[0]
+    if len(stem) != 4 or not stem.isdigit():
+        return False
+
+    return int(stem) < EARLIEST_EXTRACT_YEAR
+
+
 def build_dataframe(data_dir: str) -> pd.DataFrame:
     """
     Reads every zip in data_dir and returns the cleaned, deduplicated DataFrame.
@@ -881,8 +927,18 @@ def build_dataframe(data_dir: str) -> pd.DataFrame:
     total_records = 0
     trailer_problems = 0
 
+    skipped = 0
+    if EARLIEST_EXTRACT_YEAR is not None:
+        logging.info(
+            f"EARLIEST_EXTRACT_YEAR is {EARLIEST_EXTRACT_YEAR}, so yearly "
+            f"archives before then will be skipped.")
+
     for file_name in sorted(os.listdir(data_dir)):
         if not file_name.lower().endswith(".zip"):
+            continue
+
+        if should_skip_archive(file_name):
+            skipped += 1
             continue
 
         zip_filepath = os.path.join(data_dir, file_name)
