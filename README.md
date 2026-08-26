@@ -29,7 +29,8 @@ This is a massive update. The short version: the old pipeline was quietly produc
 
 ### Data that was wrong in ways you couldn't see
 
-* **Deduplication was deleting real sales.** Two different sales of the same property, same day, same price, were treated as one record - 23,639 groups of genuinely separate transactions were being collapsed. Sales are now keyed on the dealing number, which is the actual registered identifier. 36,271 rows came back.
+* **Deduplication was deleting real sales, in two different ways.** The original key was the property, the date and the price, so two genuinely separate sales of the same property on the same day for the same price collapsed into one - 23,639 groups of them. Adding the dealing number, which is the actual registered identifier, brought 36,271 rows back.
+* **Then the dealing number turned out not to be enough either.** One dealing routinely covers several parcels, and each parcel is its own row - two strata units sold together, a farm made of four lots. Keyed on the property and dealing alone, every parcel but one was thrown away. Adding the legal description recovered another **99,427 records**. It was also quietly corrupting `Parcels in sale`, the column whose whole job is to warn you that a price is repeated across parcels.
 * **15,081 legal descriptions were glued together**, so one property's description ran straight into the next one's. Now zero.
 * **1990 was missing.** The download loop counted back 35 years from the current year, so it actually started at 1991 - and would have started at 1992 next January. It's an absolute year now.
 * **Hectares were being reported as square metres.** Land area comes through in either unit and the column didn't say which. `Area (m2)` is now always square metres.
@@ -94,7 +95,8 @@ Before it packages anything, `3-publish.py` compares the new CSV against the las
 * **Hectares to square metres.** `Area (m2)` is multiplied by 10,000 where the source unit is `H`. The original number and unit stay in `Area (source)` and `Area type (source)`.
 * **ALL CAPS to Title Case** for names, streets, suburbs and purpose - then `Mc` and `'s` repaired afterwards, because `.str.title()` gets both wrong.
 * **Impossible dates nulled.** Anything in the future or before 1990-01-01 becomes empty. The row stays; only the bad date goes.
-* **Duplicates removed**, keyed on `(Property ID, Dealing number)` where there's a dealing number, falling back to a key including the address where there isn't. About 31% of pre-2001 records have no property ID at all, and a key without the address merged unrelated properties sold on the same day for the same price.
+* **Duplicates removed**, keyed on `(Property ID, Dealing number, Property legal description)` where there's a dealing number, falling back to a key including the address where there isn't. The legal description is in there because one dealing can cover several parcels and each is a real, separate row. Pre-2001 records have no dealing number at all, and about 31% have no property ID either, so their key has to include the address - without it, unrelated properties sold on the same day for the same price merged into one.
+* **What's left after that is genuine restatement.** The Valuer General republishes corrected records, and the annual archives are roll-ups of that year's weekly files, so the same sale legitimately appears more than once. Measured on 2020 onwards: of 80,166 rows removed, 99.96% had been republished at a later timestamp, and 97.3% were identical to the version kept in every field describing the property. The rest differ in things like `Area` and `Zoning` - actual corrections, where the newer version wins.
 * **Flags, not deletions.** Part interests, non-market prices and reversed dates get a flag column. Nothing is dropped on your behalf.
 
 ## Documentation
