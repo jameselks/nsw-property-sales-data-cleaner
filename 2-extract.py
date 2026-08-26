@@ -816,10 +816,13 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     df = pd.concat([deduped_with_dealing, deduped_without_dealing], ignore_index=True)
 
     # --- 5b. How many parcels each sale covered ---
-    # One dealing can cover several parcels (50,357 across the corpus), and each
+    # One dealing can cover several parcels (115,054 dealings across the corpus,
+    # 287,179 rows, the largest single sale spanning 195 parcels), and each
     # parcel is a separate row carrying the FULL sale price. Summing or taking a
     # median across them double-counts, so expose the count and let callers
-    # decide. Left null for pre-2001 records, which have no dealing number and
+    # decide. This is only correct because MODERN_DEDUP_KEY keeps the parcel
+    # rows - keyed without the legal description, this column reported 1 for
+    # sales that covered a dozen lots. Left null for pre-2001 records, which have no dealing number and
     # therefore no way to know.
     df['Parcels in sale'] = pd.NA
     dealing_rows = df['Dealing number'].notna() & (df['Dealing number'] != '')
@@ -1022,9 +1025,9 @@ def main() -> None:
         # Exit non-zero rather than returning quietly. An empty result means
         # something upstream broke - a corrupt archive, an empty data/, a parser
         # that matched nothing - and the previous run's CSV is usually still
-        # sitting at FINAL_CSV_PATH. Returning 0 here lets the cron's `&&` chain
+        # sitting at FINAL_CSV_PATH. Returning 0 here instead would let the cron's `&&` chain
         # continue, and 3-publish.py then republishes that stale file stamped
-        # with today's date. That is exactly what production did for 81 days.
+        # with today's date.
         logging.error(
             f"No records were extracted from {DATA_DIR}. Refusing to continue, "
             f"because any existing {FINAL_CSV_PATH} is from an earlier run and "

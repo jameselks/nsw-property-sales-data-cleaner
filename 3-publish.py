@@ -74,7 +74,7 @@ MAX_NULL_RATE_RISE_POINTS = 10.0
 # How stale the newest source record may be. 1-download.py deliberately skips
 # the most recent RECENT_WEEKS_TO_EXCLUDE (14) days and the files are weekly, so
 # roughly 21 days behind is healthy. Past 35 days the weekly downloads have
-# stopped - which is precisely the failure that went unnoticed for 81 days.
+# stopped.
 MAX_DATA_AGE_DAYS = 35
 
 # A floor to catch a header-only or otherwise gutted file on a first run, when
@@ -145,6 +145,10 @@ def check_csv_freshness(csv_path: str) -> list:
     Args:
         csv_path (str): Path to the cleaned CSV.
 
+    Says nothing on success. It runs twice on a normal run - once in main(),
+    once as a guard inside create_archives() - so logging here would report the
+    same thing twice. main() announces the age; this just answers the question.
+
     Returns:
         list: Human-readable failure messages; empty means everything passed.
     """
@@ -157,7 +161,6 @@ def check_csv_freshness(csv_path: str) -> list:
             f"now would stamp today's date on stale data."
         ]
 
-    logging.info(f"Source CSV is {age_hours:.1f} hours old - written by this run.")
     return []
 
 
@@ -372,9 +375,10 @@ def create_archives(
     logging.info(f"Copying {dated_zip_name} to {generic_zip_name}")
     shutil.copyfile(dated_zip_name, generic_zip_name)
 
-    elapsed_seconds = int(time.time() - start_time)
-    logging.info(f"Complete: zip archive has been created.")
-    logging.info(f"Total elapsed time was {elapsed_seconds} seconds")
+    # A step timing, deliberately not called a total - main() owns that, and
+    # two different "Total elapsed time" lines in one log is how this read
+    # before the merge.
+    logging.info(f"Archive written in {int(time.time() - start_time)} seconds.")
 
 
 # =========================================================================
@@ -397,6 +401,9 @@ def main() -> None:
     failures = check_csv_freshness(FINAL_CSV_PATH)
 
     if not failures:
+        age_hours = (time.time() - os.path.getmtime(FINAL_CSV_PATH)) / 3600
+        logging.info(f"Source CSV is {age_hours:.1f} hours old - written by this run.")
+
         metrics = collect_metrics(FINAL_CSV_PATH)
         baseline = load_baseline(BASELINE_PATH)
 
@@ -425,6 +432,8 @@ def main() -> None:
     logging.info("Checks passed; the dataset is safe to publish.")
 
     create_archives(FINAL_CSV_PATH, GENERIC_ZIP_NAME)
+
+    logging.info("Complete: the dataset has been checked and packaged.")
     logging.info(f"Total elapsed time was {int(time.time() - start_time)} seconds.")
 
 
